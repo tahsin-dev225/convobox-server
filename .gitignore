@@ -13,3 +13,5 @@ dist
 /generated/prisma
 
 .vercel
+
+/generated/prisma

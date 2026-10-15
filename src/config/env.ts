@@ -1,0 +1,103 @@
+import dotenv from "dotenv";
+import AppError from "../app/errorHelpers/appError";
+import status from "http-status";
+
+// Load env only when not in production (Vercel already provides env)
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
+
+interface EnvConfig {
+  NODE_ENV: string;
+  PORT: string;
+  DATABASE_URL: string;
+  BETTER_AUTH_SECRET: string;
+  BETTER_AUTH_URL: string;
+  JWT_ACCESS_TOKEN_SECRET: string;
+  JWT_ACCESS_TOKEN_EXPIRES_IN: string;
+  JWT_REFRESH_TOKEN_SECRET: string;
+  JWT_REFRESH_TOKEN_EXPIRES_IN: string;
+  BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN: string;
+  BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE: string;
+
+  FRONTEND_URL: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  GOOGLE_CALLBACK_URL: string;
+  CLOUDINARY: {
+    CLOUDINARY_CLOUD_NAME: string;
+    CLOUDINARY_API_KEY: string;
+    CLOUDINARY_API_SECRET: string;
+  };
+
+}
+
+const loadEnvVariables = (): EnvConfig => {
+  const requiredEnvVariables = [
+    "NODE_ENV",
+    "PORT",
+    "DATABASE_URL",
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL",
+    "JWT_ACCESS_TOKEN_SECRET",
+    "JWT_ACCESS_TOKEN_EXPIRES_IN",
+    "JWT_REFRESH_TOKEN_SECRET",
+    "JWT_REFRESH_TOKEN_EXPIRES_IN",
+    "BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN",
+    "BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE",
+    "FRONTEND_URL",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_CALLBACK_URL",
+    "CLOUDINARY_CLOUD_NAME",
+    "CLOUDINARY_API_KEY",
+    "CLOUDINARY_API_SECRET"
+  ];
+
+  // ✅ Skip validation during Prisma generate, build time, or postinstall
+  const isPrisma = process.argv.some((arg) => arg.includes("prisma"));
+  const isBuild =
+    process.env.npm_lifecycle_event === "build" ||
+    process.env.npm_lifecycle_event === "postinstall" ||
+    process.env.npm_lifecycle_event === "prisma:generate";
+
+  if (isPrisma || isBuild) {
+    return process.env as unknown as EnvConfig;
+  }
+
+  requiredEnvVariables.forEach((variable) => {
+    if (!process.env[variable]) {
+      throw new AppError(
+        status.BAD_REQUEST,
+        `Environment variable ${variable} is required but not set`,
+      );
+    }
+  });
+
+  return {
+    NODE_ENV: process.env.NODE_ENV!,
+    PORT: process.env.PORT!,
+    DATABASE_URL: process.env.DATABASE_URL!,
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET!,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL!,
+    JWT_ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_TOKEN_SECRET!,
+    JWT_ACCESS_TOKEN_EXPIRES_IN: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN!,
+    JWT_REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_TOKEN_SECRET!,
+    JWT_REFRESH_TOKEN_EXPIRES_IN: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN!,
+    BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN:
+      process.env.BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN!,
+    BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE:
+      process.env.BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE!,
+    FRONTEND_URL: process.env.FRONTEND_URL!,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET!,
+    GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL!,
+    CLOUDINARY: {
+      CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME!,
+      CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY!,
+      CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET!,
+    },
+  };
+};
+
+export const envVars = loadEnvVariables();
